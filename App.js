@@ -28,10 +28,20 @@ const PORT = process.env.PORT || 5000;
 const clientSessionStore = new MongoDBStore({
   uri: MONGODB_URL,
   collection: "clientSessions",
+  mongoOptions: {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    tls: true,
+  },
 });
 const adminSessionStore = new MongoDBStore({
   uri: MONGODB_URL,
   collection: "adminSessions",
+  mongoOptions: {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    tls: true,
+  },
 });
 clientSessionStore.on("error", (err) =>
   console.error("Client session error:", err)
@@ -105,119 +115,125 @@ app.use(chatRoomRoutes);
 app.get("/", (_, res) => res.send("Hello world!"));
 
 // ===================== MONGODB + SOCKET.IO =====================
-mongoose.connect(MONGODB_URL).then(() => {
-  const server = http.createServer(app);
-  const io = new Server(server, {
-    cors: {
-      origin: [
-        "http://localhost:3000",
-        "http://localhost:3001",
-        "https://clientshopping-66b41.web.app",
-        "https://adminshopping-fabfc.web.app",
-      ],
-      credentials: true,
-    },
-  });
+mongoose
+  .connect(MONGODB_URL, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    tls: true,
+  })
+  .then(() => {
+    const server = http.createServer(app);
+    const io = new Server(server, {
+      cors: {
+        origin: [
+          "http://localhost:3000",
+          "http://localhost:3001",
+          "https://clientshopping-66b41.web.app",
+          "https://adminshopping-fabfc.web.app",
+        ],
+        credentials: true,
+      },
+    });
 
-  const clientNamespace = io.of("/client");
-  const adminNamespace = io.of("/admin");
+    const clientNamespace = io.of("/client");
+    const adminNamespace = io.of("/admin");
 
-  // Hàm xử lý chung khi nhận sendMessage để tránh lặp code
-  const handleSendMessage = async (namespace, socket, msg) => {
-    const { roomId, sender, message, role } = msg;
+    // Hàm xử lý chung khi nhận sendMessage để tránh lặp code
+    const handleSendMessage = async (namespace, socket, msg) => {
+      const { roomId, sender, message, role } = msg;
 
-    if (message.trim() === "/end") {
-      // Xóa phòng chat
-      await ChatRoom.deleteOne({ roomId });
+      if (message.trim() === "/end") {
+        // Xóa phòng chat
+        await ChatRoom.deleteOne({ roomId });
 
-      // Phát sự kiện "roomEnded" đến tất cả thành viên trong room (cả client và admin)
-      clientNamespace
-        .to(roomId)
-        .emit("roomEnded", { roomId, message: "Phiên tư vấn đã kết thúc." });
-      adminNamespace
-        .to(roomId)
-        .emit("roomEnded", { roomId, message: "Phiên tư vấn đã kết thúc." });
+        // Phát sự kiện "roomEnded" đến tất cả thành viên trong room (cả client và admin)
+        clientNamespace
+          .to(roomId)
+          .emit("roomEnded", { roomId, message: "Phiên tư vấn đã kết thúc." });
+        adminNamespace
+          .to(roomId)
+          .emit("roomEnded", { roomId, message: "Phiên tư vấn đã kết thúc." });
 
-      // Socket hiện tại rời phòng
-      socket.leave(roomId);
-      return;
-    }
+        // Socket hiện tại rời phòng
+        socket.leave(roomId);
+        return;
+      }
 
-    const messageData = {
-      senderId: msg.senderId || "unknown",
-      senderName: sender,
-      message,
-      isAdmin: role === "admin",
+      const messageData = {
+        senderId: msg.senderId || "unknown",
+        senderName: sender,
+        message,
+        isAdmin: role === "admin",
+      };
+
+      await ChatRoom.findOneAndUpdate(
+        { roomId },
+        { $push: { messages: messageData } },
+        { upsert: true }
+      );
+
+      // Gửi tin nhắn đến tất cả thành viên trong room (cả client và admin)
+      clientNamespace.to(roomId).emit("receiveMessage", messageData);
+      adminNamespace.to(roomId).emit("receiveMessage", messageData);
     };
 
-    await ChatRoom.findOneAndUpdate(
-      { roomId },
-      { $push: { messages: messageData } },
-      { upsert: true }
-    );
+    clientNamespace.on("connection", (socket) => {
+      console.log("Client connected:", socket.id);
 
-    // Gửi tin nhắn đến tất cả thành viên trong room (cả client và admin)
-    clientNamespace.to(roomId).emit("receiveMessage", messageData);
-    adminNamespace.to(roomId).emit("receiveMessage", messageData);
-  };
+      socket.on("joinRoom", async ({ userId, roomId, fullName, role }) => {
+        socket.join(roomId);
+        console.log(`${fullName} (client) joined room ${roomId}`);
 
-  clientNamespace.on("connection", (socket) => {
-    console.log("Client connected:", socket.id);
+        const existingRoom = await ChatRoom.findOne({ roomId });
+        if (!existingRoom) {
+          await ChatRoom.create({
+            roomId,
+            userId,
+            messages: [],
+          });
+          clientNamespace.emit("new_room", { roomId, userId, fullName });
+        } else {
+          socket.emit("chatHistory", existingRoom.messages);
+        }
+      });
 
-    socket.on("joinRoom", async ({ userId, roomId, fullName, role }) => {
-      socket.join(roomId);
-      console.log(`${fullName} (client) joined room ${roomId}`);
+      socket.on("sendMessage", (msg) => {
+        handleSendMessage(clientNamespace, socket, msg);
+      });
 
-      const existingRoom = await ChatRoom.findOne({ roomId });
-      if (!existingRoom) {
-        await ChatRoom.create({
-          roomId,
-          userId,
-          messages: [],
-        });
-        clientNamespace.emit("new_room", { roomId, userId, fullName });
-      } else {
-        socket.emit("chatHistory", existingRoom.messages);
-      }
+      socket.on("disconnect", () => {
+        console.log("Client disconnected:", socket.id);
+      });
     });
 
-    socket.on("sendMessage", (msg) => {
-      handleSendMessage(clientNamespace, socket, msg);
+    adminNamespace.on("connection", (socket) => {
+      console.log("Admin connected:", socket.id);
+
+      socket.on("joinRoom", async ({ userId, roomId, fullName, role }) => {
+        socket.join(roomId);
+        console.log(`${fullName} (admin) joined room ${roomId}`);
+
+        const existingRoom = await ChatRoom.findOne({ roomId });
+        if (!existingRoom) {
+          await ChatRoom.create({
+            roomId,
+            userId,
+            messages: [],
+          });
+          adminNamespace.emit("new_room", { roomId, userId, fullName });
+        }
+      });
+
+      socket.on("sendMessage", (msg) => {
+        handleSendMessage(adminNamespace, socket, msg);
+      });
+
+      socket.on("disconnect", () => {
+        console.log("Admin disconnected:", socket.id);
+      });
     });
 
-    socket.on("disconnect", () => {
-      console.log("Client disconnected:", socket.id);
-    });
-  });
-
-  adminNamespace.on("connection", (socket) => {
-    console.log("Admin connected:", socket.id);
-
-    socket.on("joinRoom", async ({ userId, roomId, fullName, role }) => {
-      socket.join(roomId);
-      console.log(`${fullName} (admin) joined room ${roomId}`);
-
-      const existingRoom = await ChatRoom.findOne({ roomId });
-      if (!existingRoom) {
-        await ChatRoom.create({
-          roomId,
-          userId,
-          messages: [],
-        });
-        adminNamespace.emit("new_room", { roomId, userId, fullName });
-      }
-    });
-
-    socket.on("sendMessage", (msg) => {
-      handleSendMessage(adminNamespace, socket, msg);
-    });
-
-    socket.on("disconnect", () => {
-      console.log("Admin disconnected:", socket.id);
+    server.listen(PORT, () => {
+      console.log("Server with Socket.IO is running on port " + PORT);
     });
   });
-
-  server.listen(PORT, () => {
-    console.log("Server with Socket.IO is running on port " + PORT);
-  });
-});
