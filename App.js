@@ -31,7 +31,7 @@ const clientSessionStore = new MongoDBStore({
   mongoOptions: {
     useNewUrlParser: true,
     useUnifiedTopology: true,
-    tls: true,
+    ssl: true,
   },
 });
 const adminSessionStore = new MongoDBStore({
@@ -40,7 +40,7 @@ const adminSessionStore = new MongoDBStore({
   mongoOptions: {
     useNewUrlParser: true,
     useUnifiedTopology: true,
-    tls: true,
+    ssl: true,
   },
 });
 clientSessionStore.on("error", (err) =>
