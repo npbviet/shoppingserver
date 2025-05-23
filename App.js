@@ -104,8 +104,8 @@ const sessionConfig = (store, name) => ({
   },
 });
 
-app.use("/client", session(sessionConfig(clientSessionStore, "client.sid")));
-app.use("/admin", session(sessionConfig(adminSessionStore, "admin.sid")));
+app.use(session(sessionConfig(clientSessionStore, "client.sid")));
+app.use(session(sessionConfig(adminSessionStore, "admin.sid")));
 
 // ===================== ROUTES =====================
 app.use(authRoutes);
