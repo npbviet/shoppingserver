@@ -6,39 +6,11 @@ const setDataController = require("../controllers/setData");
 const { checkAuthen } = require("../middleware/checkAuthen.js");
 const { parseToJSON } = require("../middleware/parseToJSON.js");
 
-// ========================== CLIENT ROUTES ==========================
-
-// Thêm sản phẩm vào giỏ hàng
-router.post("/client/add-cart", checkAuthen, setDataController.addCart);
-
-// Cập nhật giỏ hàng
-router.post("/client/update-cart", checkAuthen, setDataController.updateCart);
-
-// Xóa 1 sản phẩm khỏi giỏ hàng
-router.post(
-  "/client/cart/delete-item",
-  checkAuthen,
-  setDataController.deleteItemInCart
-);
-
-// Xóa toàn bộ giỏ hàng
-router.post("/client/delete-cart", checkAuthen, setDataController.deleteCart);
-
-// Tạo đơn hàng mới
-router.post("/client/create-order", checkAuthen, setDataController.createOrder);
-
-// Cập nhật số lượng sản phẩm sau khi đặt hàng
-router.post(
-  "/client/product/update-quantity",
-  checkAuthen,
-  setDataController.updateQuantityOfProducts
-);
-
 // ========================== ADMIN ROUTES ==========================
 
 // Thêm sản phẩm mới
 router.post(
-  "/admin/product/add",
+  "/product/add",
   checkAuthen,
   parseToJSON,
   [
@@ -67,7 +39,7 @@ router.post(
 
 // Sửa sản phẩm
 router.post(
-  "/admin/product/edit",
+  "/product/edit",
   checkAuthen,
   [
     body("productInfor.name")
@@ -97,7 +69,7 @@ router.post(
 
 // Xóa sản phẩm
 router.post(
-  "/admin/product/delete",
+  "/product/delete",
   checkAuthen,
   setDataController.postDeleteProduct
 );

@@ -41,44 +41,26 @@ const validateEmailUnique = () =>
 // ========== ROUTERS FOR CLIENT ===========
 
 // Check Login
-router.get("/client/checklogin", authController.checkLogin);
+router.get("/checklogin", authController.checkLogin);
 
 // Get current user info
-router.get("/client/get-current-user", authController.getCurrentUserInfor);
+router.get("/get-current-user", authController.getCurrentUserInfor);
 
 // Login client
 router.post(
-  "/client/login",
+  "/login",
   [validateEmail(), validatePasswordLogin()],
   authController.postLogin
 );
 
 // Signup client
 router.post(
-  "/client/signup",
+  "/signup",
   [validateEmail(), validateEmailUnique(), validatePasswordSignup()],
   authController.postSignup
 );
 
 // Logout client
-router.get("/client/logout", authController.getLogout);
-
-// ========== ROUTERS FOR ADMIN ===========
-
-// Get active user info
-router.get("/admin/getActiveUserInfor", authController.getCurrentUserInfor);
-
-// Check Login admin
-router.get("/admin/checklogin", authController.checkLogin);
-
-// Login admin
-router.post(
-  "/admin/login",
-  [validateEmail(), validatePasswordLogin()],
-  authController.postLoginAdmin
-);
-
-// Logout admin
-router.get("/admin/logout", authController.getLogout);
+router.get("/logout", authController.getLogout);
 
 module.exports = router;

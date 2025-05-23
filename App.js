@@ -9,9 +9,14 @@ const fs = require("fs");
 const path = require("path");
 require("dotenv").config();
 
-const authRoutes = require("./routers/auth.routes");
-const getDataRouter = require("./routers/getData.routes");
-const setDataRouter = require("./routers/setData.routes");
+const authAdminRoutes = require("./routers/admin/auth.routes");
+const getDataAdminRouter = require("./routers/admin/getData.routes");
+const setDataAdminRouter = require("./routers/admin/setData.routes");
+
+const authClientRoutes = require("./routers/client/auth.routes");
+const getDataClientRouter = require("./routers/client/getData.routes");
+const setDataClientRouter = require("./routers/client/setData.routes");
+
 const chatRoomRoutes = require("./routers/chatRooms.routes");
 
 const app = express();
@@ -104,13 +109,18 @@ const sessionConfig = (store, name) => ({
   },
 });
 
-app.use(session(sessionConfig(clientSessionStore, "client.sid")));
-app.use(session(sessionConfig(adminSessionStore, "admin.sid")));
+app.use("/client", session(sessionConfig(clientSessionStore, "client.sid")));
+app.use("/admin", session(sessionConfig(adminSessionStore, "admin.sid")));
 
 // ===================== ROUTES =====================
-app.use(authRoutes);
-app.use(getDataRouter);
-app.use(setDataRouter);
+app.use("/client", authClientRoutes);
+app.use("/client", getDataClientRouter);
+app.use("/client", setDataClientRouter);
+
+app.use("/admin", authAdminRoutes);
+app.use("/admin", getDataAdminRouter);
+app.use("/admin", setDataAdminRouter);
+
 app.use(chatRoomRoutes);
 app.get("/", (_, res) => res.send("Hello world!"));
 
