@@ -1,8 +1,8 @@
 const express = require("express");
 const router = express.Router();
 
-const setDataController = require("../controllers/setData");
-const { checkAuthen } = require("../middleware/checkAuthen.js");
+const setDataController = require("../../controllers/setData");
+const { checkAuthen } = require("../../middleware/checkAuthen.js");
 
 // ========================== CLIENT ROUTES ==========================
 

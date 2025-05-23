@@ -2,9 +2,9 @@ const express = require("express");
 const router = express.Router();
 const { body } = require("express-validator");
 
-const setDataController = require("../controllers/setData");
-const { checkAuthen } = require("../middleware/checkAuthen.js");
-const { parseToJSON } = require("../middleware/parseToJSON.js");
+const setDataController = require("../../controllers/setData");
+const { checkAuthen } = require("../../middleware/checkAuthen.js");
+const { parseToJSON } = require("../../middleware/parseToJSON.js");
 
 // ========================== ADMIN ROUTES ==========================
 

@@ -1,8 +1,8 @@
 const express = require("express");
 const router = express.Router();
 const { body } = require("express-validator");
-const authController = require("../controllers/auth");
-const User = require("../models/user");
+const authController = require("../../controllers/auth");
+const User = require("../../models/user");
 
 // Hàm validate email chung cho cả client và admin
 const validateEmail = () =>

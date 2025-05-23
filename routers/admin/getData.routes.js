@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const getDataController = require("../controllers/getData");
+const getDataController = require("../../controllers/getData");
 
 // ======================================= PART-2: ROUTERS FOR ADMIN-APP ========================================
 // Router for get product data
