@@ -19,6 +19,17 @@ exports.checkLogin = (req, res) => {
   res.json({ isLoggedIn: req.session.isLoggedIn || false });
 };
 
+// Lấy thông tin user hiện tại từ session
+exports.getCurrentUserInfor = (req, res) => {
+  if (!req.session?.isLoggedIn || !req.session.user) {
+    return res
+      .status(401)
+      .json({ message: "Chưa đăng nhập", isLoggedIn: false });
+  }
+  // Trả về thông tin user và trạng thái đăng nhập
+  res.json({ ...getUserInfo(req.session.user), isLoggedIn: true });
+};
+
 // Xử lý đăng nhập user
 exports.postLogin = async (req, res) => {
   try {
@@ -50,15 +61,8 @@ exports.postLogin = async (req, res) => {
 
     // Nếu đúng, tạo session lưu trạng thái đăng nhập và thông tin user
     req.session.isLoggedIn = true;
-    req.session.user = {
-      userID: user._id,
-      userEmail: user.email,
-      fullName: user.fullName,
-      lastName: user.fullName.split(" ").at(-1),
-      phone: user.phone,
-      role: user.role,
-    };
-    // await req.session.save(); // Lưu session
+    req.session.user = user;
+    await req.session.save(); // Lưu session
 
     // Trả về thông báo đăng nhập thành công kèm thông tin user
     res.json({
@@ -66,7 +70,6 @@ exports.postLogin = async (req, res) => {
       isAuthError: false,
       ...getUserInfo(user),
       isLoggedIn: true,
-      sessionInfo: JSON.stringify(req.session),
     });
   } catch (err) {
     console.error("Lỗi khi đăng nhập:", err);
@@ -118,24 +121,6 @@ exports.getLogout = (req, res) => {
     }
     // Trả về thông báo đăng xuất thành công
     res.json({ message: "Đăng xuất thành công" });
-  });
-};
-
-// Lấy thông tin user hiện tại từ session
-exports.getCurrentUserInfor = (req, res) => {
-  console.log(req.session);
-  // if (!req.session?.isLoggedIn || !req.session.user) {
-  //   // loi dang roi vaocase naynay
-  //   return res.status(401).json({
-  //     message: "Chưa đăng nhập",
-  //     isLoggedIn: JSON.stringify(req.session.user),
-  //   });
-  // }
-  // Trả về thông tin user và trạng thái đăng nhập
-  // res.json({ ...getUserInfo(req.session.user), isLoggedIn: true });
-  res.json({
-    message: "getCurrentUserInfor",
-    sessionInfo: JSON.stringify(req.session.user),
   });
 };
 
