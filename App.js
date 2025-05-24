@@ -128,9 +128,14 @@ app.use(chatRoomRoutes);
 app.get("/", (_, res) => res.send("Hello world!"));
 
 app.get("/test-session", (req, res) => {
-  req.session.testValue = "Hello Session!";
-  console.log("Session:", req.session);
-  res.send(req.session);
+  try {
+    req.session.testValue = "Hello Session!";
+    console.log("Session:", req.session);
+    res.json({ session: req.session });
+  } catch (error) {
+    console.error("Session error:", error);
+    res.status(500).json({ error: error.message });
+  }
 });
 // ===================== MONGODB + SOCKET.IO =====================
 mongoose
