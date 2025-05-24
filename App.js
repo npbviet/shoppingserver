@@ -127,18 +127,10 @@ app.use("/admin", setDataAdminRouter);
 app.use(chatRoomRoutes);
 app.get("/", (_, res) => res.send("Hello world!"));
 
-app.get("/test-cookie", (req, res) => {
-  res.cookie("test_cookie", "hello", {
-    httpOnly: true,
-    secure: true,
-    sameSite: "none",
-  });
-  res.send("Cookie test!");
-});
-app.set("trust proxy", 1);
-app.get("/debug-session", (req, res) => {
-  console.log(req.session);
-  res.json({ session: req.session });
+app.get("/test-session", (req, res) => {
+  req.session.testValue = "Hello Session!";
+  console.log("Session:", req.session);
+  res.send(req.session);
 });
 // ===================== MONGODB + SOCKET.IO =====================
 mongoose
