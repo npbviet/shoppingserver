@@ -135,7 +135,11 @@ app.get("/test-cookie", (req, res) => {
   });
   res.send("Cookie test!");
 });
-
+app.set("trust proxy", 1);
+app.get("/debug-session", (req, res) => {
+  console.log(req.session);
+  res.json({ session: req.session });
+});
 // ===================== MONGODB + SOCKET.IO =====================
 mongoose
   .connect(MONGODB_URL, {
