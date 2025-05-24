@@ -112,8 +112,27 @@ const sessionConfig = (store, name) => ({
   },
 });
 
-app.use("/client", session(sessionConfig(clientSessionStore, "client.sid")));
-app.use("/admin", session(sessionConfig(adminSessionStore, "admin.sid")));
+// app.use("/client", session(sessionConfig(clientSessionStore, "client.sid")));
+// app.use("/admin", session(sessionConfig(adminSessionStore, "admin.sid")));
+
+app.use(
+  "/client",
+  session({
+    secret: "secretSession",
+    resave: false,
+    saveUninitialized: false,
+    store: clientSessionStore,
+    cookie: {
+      httpOnly: true,
+      maxAge: 2 * 60 * 60 * 1000,
+      sameSite: "none",
+      secure: true,
+
+      // sameSite: "lax",
+      // secure: process.env.NODE_ENV === "production",
+    },
+  })
+);
 
 // ===================== ROUTES =====================
 app.use("/client", authClientRoutes);
