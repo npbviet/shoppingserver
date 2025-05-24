@@ -24,12 +24,10 @@ exports.getCurrentUserInfor = (req, res) => {
   console.log(req.session);
   if (!req.session?.isLoggedIn || !req.session.user) {
     // loi dang roi vaocase naynay
-    return res
-      .status(401)
-      .json({
-        message: "Chưa đăng nhập",
-        isLoggedIn: JSON.stringify(req.session),
-      });
+    return res.status(401).json({
+      message: "Chưa đăng nhập",
+      isLoggedIn: JSON.stringify(req.session.isLoggedIn),
+    });
   }
   // Trả về thông tin user và trạng thái đăng nhập
   res.json({ ...getUserInfo(req.session.user), isLoggedIn: true });
