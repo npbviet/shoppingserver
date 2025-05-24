@@ -66,7 +66,7 @@ exports.postLogin = async (req, res) => {
       isAuthError: false,
       ...getUserInfo(user),
       isLoggedIn: true,
-      sessionInfo: JSON.stringify(req.session.user),
+      sessionInfo: JSON.stringify(req.session),
     });
   } catch (err) {
     console.error("Lỗi khi đăng nhập:", err);
@@ -132,7 +132,11 @@ exports.getCurrentUserInfor = (req, res) => {
   //   });
   // }
   // Trả về thông tin user và trạng thái đăng nhập
-  res.json({ ...getUserInfo(req.session.user), isLoggedIn: true });
+  // res.json({ ...getUserInfo(req.session.user), isLoggedIn: true });
+  res.json({
+    message: "getCurrentUserInfor",
+    sessionInfo: JSON.stringify(req.session.user),
+  });
 };
 
 // ================= PART-2: ACTIONS CHO ADMIN-APP =================
