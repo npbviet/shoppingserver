@@ -21,7 +21,9 @@ exports.checkLogin = (req, res) => {
 
 // Lấy thông tin user hiện tại từ session
 exports.getCurrentUserInfor = (req, res) => {
+  console.log(req.session);
   if (!req.session?.isLoggedIn || !req.session.user) {
+    // loi dang roi vaocase naynay
     return res
       .status(401)
       .json({ message: "Chưa đăng nhập", isLoggedIn: false });
