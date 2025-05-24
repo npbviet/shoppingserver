@@ -104,7 +104,7 @@ const sessionConfig = (store, name) => ({
   cookie: {
     httpOnly: true,
     maxAge: 2 * 60 * 60 * 1000,
-    // sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+    sameSite: "lax", //process.env.NODE_ENV === "production" ? "none" : "lax",
     secure: false, //process.env.NODE_ENV === "production",
   },
 });

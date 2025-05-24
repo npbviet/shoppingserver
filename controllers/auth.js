@@ -26,7 +26,7 @@ exports.getCurrentUserInfor = (req, res) => {
     // loi dang roi vaocase naynay
     return res.status(401).json({
       message: "Chưa đăng nhập",
-      isLoggedIn: JSON.stringify(req.session.isLoggedIn),
+      isLoggedIn: JSON.stringify(req.session),
     });
   }
   // Trả về thông tin user và trạng thái đăng nhập
@@ -64,8 +64,15 @@ exports.postLogin = async (req, res) => {
 
     // Nếu đúng, tạo session lưu trạng thái đăng nhập và thông tin user
     req.session.isLoggedIn = true;
-    req.session.user = user;
-    await req.session.save(); // Lưu session
+    req.session.user = {
+      userID: user._id,
+      userEmail: user.email,
+      fullName: user.fullName,
+      lastName: user.fullName.split(" ").at(-1),
+      phone: user.phone,
+      role: user.role,
+    };
+    // await req.session.save(); // Lưu session
 
     // Trả về thông báo đăng nhập thành công kèm thông tin user
     res.json({
@@ -73,6 +80,7 @@ exports.postLogin = async (req, res) => {
       isAuthError: false,
       ...getUserInfo(user),
       isLoggedIn: true,
+      sessionInfo: JSON.stringify(req.session.user),
     });
   } catch (err) {
     console.error("Lỗi khi đăng nhập:", err);
