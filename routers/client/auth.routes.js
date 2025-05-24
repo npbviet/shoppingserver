@@ -44,7 +44,7 @@ const validateEmailUnique = () =>
 router.get("/checklogin", authController.checkLogin);
 
 // Get current user info
-router.post("/get-current-user", authController.getCurrentUserInfor);
+router.get("/get-current-user", authController.getCurrentUserInfor);
 
 // Login client
 router.post(
