@@ -127,6 +127,15 @@ app.use("/admin", setDataAdminRouter);
 app.use(chatRoomRoutes);
 app.get("/", (_, res) => res.send("Hello world!"));
 
+app.get("/test-cookie", (req, res) => {
+  res.cookie("test_cookie", "hello", {
+    httpOnly: true,
+    secure: true,
+    sameSite: "none",
+  });
+  res.send("Cookie test!");
+});
+
 // ===================== MONGODB + SOCKET.IO =====================
 mongoose
   .connect(MONGODB_URL, {
