@@ -19,20 +19,6 @@ exports.checkLogin = (req, res) => {
   res.json({ isLoggedIn: req.session.isLoggedIn || false });
 };
 
-// Lấy thông tin user hiện tại từ session
-exports.getCurrentUserInfor = (req, res) => {
-  console.log(req.session);
-  if (!req.session?.isLoggedIn || !req.session.user) {
-    // loi dang roi vaocase naynay
-    return res.status(401).json({
-      message: "Chưa đăng nhập",
-      isLoggedIn: JSON.stringify(req.session),
-    });
-  }
-  // Trả về thông tin user và trạng thái đăng nhập
-  res.json({ ...getUserInfo(req.session.user), isLoggedIn: true });
-};
-
 // Xử lý đăng nhập user
 exports.postLogin = async (req, res) => {
   try {
@@ -133,6 +119,20 @@ exports.getLogout = (req, res) => {
     // Trả về thông báo đăng xuất thành công
     res.json({ message: "Đăng xuất thành công" });
   });
+};
+
+// Lấy thông tin user hiện tại từ session
+exports.getCurrentUserInfor = (req, res) => {
+  console.log(req.session);
+  if (!req.session?.isLoggedIn || !req.session.user) {
+    // loi dang roi vaocase naynay
+    return res.status(401).json({
+      message: "Chưa đăng nhập",
+      isLoggedIn: JSON.stringify(req.session.user),
+    });
+  }
+  // Trả về thông tin user và trạng thái đăng nhập
+  res.json({ ...getUserInfo(req.session.user), isLoggedIn: true });
 };
 
 // ================= PART-2: ACTIONS CHO ADMIN-APP =================
