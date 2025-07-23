@@ -104,11 +104,11 @@ const sessionConfig = (store, name) => ({
   cookie: {
     httpOnly: true,
     maxAge: 2 * 60 * 60 * 1000,
-    sameSite: "none",
-    secure: true,
+    // sameSite: "none",
+    // secure: true,
 
-    // sameSite: "lax",
-    // secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
   },
 });
 
