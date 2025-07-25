@@ -44,7 +44,7 @@ const adminSessionStore = new MongoDBStore({
   collection: "adminSessions",
   mongoOptions: {
     useNewUrlParser: true,
-    useUnifiedTopology: true
+    useUnifiedTopology: true,
     ssl: true,
   },
 });
